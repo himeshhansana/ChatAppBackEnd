@@ -4,19 +4,34 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import jdk.jfr.Percentage;
+import org.hibernate.annotations.Persister;
 
 @MappedSuperclass
-public class BaseEntity implements Serializable{
-    
-    @CreationTimestamp
-    @Column(name = "created_at")
+public class BaseEntity implements Serializable {
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", updatable = false)
     private Date createdAt;
-    
-    @UpdateTimestamp
+
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        createdAt = new Date();
+        updatedAt = new Date();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = new Date();
+    }
 
     public Date getCreatedAt() {
         return createdAt;
@@ -33,5 +48,5 @@ public class BaseEntity implements Serializable{
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
-    
+
 }

@@ -19,5 +19,4 @@ public class TestServlet extends HttpServlet {
         Session s = sf.openSession();
     }
 
-    
 }

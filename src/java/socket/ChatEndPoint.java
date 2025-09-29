@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package socket;
 
 import com.google.gson.Gson;
@@ -14,41 +18,35 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-/**
- *
- * @author hansa
- */
 @ServerEndpoint(value = "/chat")
 public class ChatEndPoint {
-    
+
     private static final Gson GSON = new Gson();
     private int userId;
-    
+
     @OnOpen
     public void onOpen(Session session) {
         String query = session.getQueryString();
-        
         if (query != null && query.startsWith("userId=")) {
             userId = Integer.parseInt(query.substring("userId=".length()));
             ChatService.register(userId, session);
-            ChatService.sendToUser(userId,
-                    ChatService.friendListEnvelope(ChatService.getFriendChatsFouUser(userId)));
+//            ChatService.sendToUser(userId,
+//                    ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
         }
     }
-    
+
     @OnClose
     public void onClose(Session session) {
-        
-        if (userId >= 0) { //userid != null
+        if (userId >= 0) { // userId != null
             ChatService.unregister(userId);
         }
     }
-    
+
     @OnError
     public void onError(Session session, Throwable throwable) {
         throwable.printStackTrace();
     }
-    
+
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
@@ -62,17 +60,21 @@ public class ChatEndPoint {
                     org.hibernate.Session s = HibernateUtil.getSessionFactory().openSession();
                     User fromUser = (User) s.get(User.class, fromId);
                     User toUser = (User) s.get(User.class, toId);
-                    
+
                     if (fromUser != null && toUser != null) {
                         Chat chat = new Chat(fromUser, chatText, toUser, "", Status.SENT);
                         chat.setCreatedAt(new Date());
                         chat.setUpdatedAt(new Date());
                         ChatService.deliverChat(chat);
                     }
-                    
+                    break;
+                case "get_chat_list":
+                    System.out.println("get_chat_list");
+                    ChatService.sendToUser(userId,
+                            ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
                     break;
                 default:
-                    throw new AssertionError();
+                    System.out.println("Ignored unknown client type: " + type);
             }
         } catch (Exception e) {
             e.printStackTrace();

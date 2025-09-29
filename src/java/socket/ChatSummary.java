@@ -2,9 +2,12 @@ package socket;
 
 import java.util.Date;
 
+/**
+ *
+ * @author Dilhara
+ */
 public class ChatSummary {
-
-    private int friendContact;
+    private int friendId;
     private String friendName;
     private String lastMessage;
     private Date lastTimeStamp;
@@ -14,8 +17,8 @@ public class ChatSummary {
     public ChatSummary() {
     }
 
-    public ChatSummary(int friendContact, String friendName, String lastMessage, Date lastTimeStamp, int unreadCount, String profileImage) {
-        this.friendContact = friendContact;
+    public ChatSummary(int friendId, String friendName, String lastMessage, Date lastTimeStamp, int unreadCount, String profileImage) {
+        this.friendId = friendId;
         this.friendName = friendName;
         this.lastMessage = lastMessage;
         this.lastTimeStamp = lastTimeStamp;
@@ -23,12 +26,12 @@ public class ChatSummary {
         this.profileImage = profileImage;
     }
 
-    public int getFriendContact() {
-        return friendContact;
+    public int getFriendId() {
+        return friendId;
     }
 
-    public void setFriendContact(int friendContact) {
-        this.friendContact = friendContact;
+    public void setFriendId(int friendId) {
+        this.friendId = friendId;
     }
 
     public String getFriendName() {
@@ -70,4 +73,6 @@ public class ChatSummary {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+    
+    
 }

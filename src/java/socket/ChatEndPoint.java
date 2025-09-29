@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package socket;
 
 import com.google.gson.Gson;
@@ -10,6 +7,7 @@ import entity.Status;
 import entity.User;
 import hibernate.HibernateUtil;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -17,6 +15,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+
 
 @ServerEndpoint(value = "/chat")
 public class ChatEndPoint {
@@ -69,9 +68,14 @@ public class ChatEndPoint {
                     }
                     break;
                 case "get_chat_list":
-                    System.out.println("get_chat_list");
                     ChatService.sendToUser(userId,
                             ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
+                    break;
+                case "get_single_chat":
+                    int friendId = (int) ((double) map.get("friendId"));
+                    List<Chat> chats = ChatService.getChatHistory(userId, friendId);
+                    Map<String, Object> envelop = ChatService.singleChatEnvelope(chats);
+                    ChatService.sendToUser(userId, envelop);
                     break;
                 default:
                     System.out.println("Ignored unknown client type: " + type);

@@ -1,6 +1,7 @@
 package socket;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import entity.Chat;
 import entity.FriendList;
 import entity.Status;
@@ -20,11 +21,12 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+
 public class ChatService {
 
     private static final ConcurrentHashMap<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
-    private static final Gson GSON = new Gson();
-    private static final String URL = "https://bdc6927b2c67.ngrok-free.app"; // ngrok proxy url
+    private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+    private static final String URL = "https://cd235e885ecb.ngrok-free.app"; // ngrok proxy url
 
     public static void register(int userId, Session session) {
         SESSIONS.put(userId, session);
@@ -67,7 +69,9 @@ public class ChatService {
                 c1.addOrder(Order.desc("updatedAt"));
 
                 List<Chat> chats = c1.list();
+
                 if (!chats.isEmpty()) {
+
                     int unread = 0;
                     for (Chat c : chats) {
                         if (!c.getStatus().equals(Status.READ)) {
@@ -134,22 +138,31 @@ public class ChatService {
                             Restrictions.eq("to.id", userId)
                     )
             ));
-            c.addOrder(Order.asc("createdAt"));
+            c.addOrder(Order.desc("createdAt"));
             List<Chat> list = c.list();
 
             Transaction tr = session.beginTransaction();
+
             for (Chat chat : list) {
-                if (chat.getFrom().getId() == friendId && chat.getTo().getId() == userId
-                        && chat.getStatus() == Status.SENT) {
-                    chat.setStatus(Status.DELIVERD);
+
+                if (chat.getFrom().getId() == friendId
+                        && chat.getTo().getId() == userId
+                        && chat.getStatus().equals(Status.DELIVERD)) {
+                    chat.setStatus(Status.READ);
                     session.update(chat);
                 }
             }
             tr.commit();
-
             return list;
         } finally {
             session.close();
         }
+    }
+
+    public static Map<String, Object> singleChatEnvelope(List<Chat> chats) {
+        Map<String, Object> envelope = new HashMap<>();
+        envelope.put("type", "single_chat");
+        envelope.put("payload", chats);
+        return envelope;
     }
 }

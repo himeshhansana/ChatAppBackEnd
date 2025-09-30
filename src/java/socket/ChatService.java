@@ -10,6 +10,7 @@ import hibernate.HibernateUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ public class ChatService {
 
     private static final ConcurrentHashMap<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-    private static final String URL = "https://cd235e885ecb.ngrok-free.app"; // ngrok proxy url
+    private static final String URL = "https://3595b2e5876b.ngrok-free.app"; // ngrok proxy url
 
     public static void register(int userId, Session session) {
         SESSIONS.put(userId, session);
@@ -83,7 +84,7 @@ public class ChatService {
                         String profileImage = URL + "/ChatApp/profile-images/" + myFriend.getId() + "/profile1.png";
                         map.put(myFriend.getId(), new ChatSummary(
                                 myFriend.getId(),
-                                myFriend.getFirstname()+ " " + myFriend.getLastname(),
+                                myFriend.getFirstname() + " " + myFriend.getLastname(),
                                 chats.get(0).getMessage(),
                                 chats.get(0).getUpdatedAt(),
                                 unread,
@@ -165,4 +166,40 @@ public class ChatService {
         envelope.put("payload", chats);
         return envelope;
     }
+
+    public static void saveNewChat(int userId, int friendId, String message) {
+
+        org.hibernate.Session s = HibernateUtil.getSessionFactory().openSession();
+        User me = (User) s.get(User.class, userId);
+        User friend = (User) s.get(User.class, friendId);
+        Chat chat = new Chat();
+        chat.setFrom(me);
+        chat.setTo(friend);
+        chat.setMessage(message);
+        chat.setCreatedAt(new Date());
+        chat.setUpdatedAt(new Date());
+        chat.setFile("FILE:");
+        s.save(chat);
+        s.beginTransaction().commit();
+        s.close();
+
+        Map<String, Object> envelope = new HashMap<>();
+        envelope.put("type", "new_message");
+        envelope.put("payload", chat);
+
+        // Update both side => SingleChatScreen
+        ChatService.sendToUser(chat.getFrom().getId(), envelope);
+        ChatService.sendToUser(chat.getTo().getId(), envelope);
+
+        // Update both side => HomeChatList
+        List<ChatSummary> fromList = ChatService.getFriendChatsForUser(chat.getFrom().getId()); // from List
+        List<ChatSummary> toList = ChatService.getFriendChatsForUser(chat.getTo().getId()); // to list
+        Map<String, Object> fromMap = ChatService.friendListEnvelope(fromList); // from
+        Map<String, Object> toMap = ChatService.friendListEnvelope(toList); // to
+
+        ChatService.sendToUser(chat.getFrom().getId(), fromMap); // update from home chat
+        ChatService.sendToUser(chat.getTo().getId(), toMap);     // update to home chat
+
+    }
+
 }

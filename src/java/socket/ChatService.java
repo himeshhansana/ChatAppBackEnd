@@ -24,19 +24,19 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 public class ChatService {
-
+    
     private static final ConcurrentHashMap<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-    private static final String URL = "https://3595b2e5876b.ngrok-free.app"; // ngrok proxy url
+    private static final String URL = "https://cfbaab246426.ngrok-free.app"; // ngrok proxy url
 
     public static void register(int userId, Session session) {
         SESSIONS.put(userId, session);
     }
-
+    
     public static void unregister(int userId) {
         SESSIONS.remove(userId);
     }
-
+    
     public static void sendToUser(int userId, Object payload) {
         Session ws = SESSIONS.get(userId);
         if (ws != null && ws.isOpen()) {
@@ -48,7 +48,7 @@ public class ChatService {
             }
         }
     }
-
+    
     public static List<ChatSummary> getFriendChatsForUser(int userId) {
         org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession();
         try {
@@ -68,18 +68,20 @@ public class ChatService {
                 Criterion rest3 = Restrictions.or(rest1, rest2);
                 c1.add(rest3);
                 c1.addOrder(Order.desc("updatedAt"));
-
+                
                 List<Chat> chats = c1.list();
-
+                
                 if (!chats.isEmpty()) {
-
+                    
                     int unread = 0;
                     for (Chat c : chats) {
-                        if (!c.getStatus().equals(Status.READ)) {
+                        if (c.getFrom().getId() == myFriend.getId()
+                                && c.getTo().getId() == userId
+                                && c.getStatus().equals(Status.DELIVERD)) {
                             unread += 1;
                         }
                     }
-
+                    
                     if (!map.containsKey(myFriend.getId())) {
                         String profileImage = URL + "/ChatApp/profile-images/" + myFriend.getId() + "/profile1.png";
                         map.put(myFriend.getId(), new ChatSummary(
@@ -93,38 +95,38 @@ public class ChatService {
                     }
                 }
             }
-
+            
             return new ArrayList<>(map.values());
         } finally {
             session.close();
         }
     }
-
+    
     public static void deliverChat(Chat chat) {
         org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tr = session.beginTransaction();
         session.persist(chat);
         tr.commit();
         session.close();
-
+        
         Map<String, Object> envelope = new HashMap<>();
         envelope.put("type", "chat");
         envelope.put("payload", chat);
-
+        
         sendToUser(chat.getTo().getId(), envelope);
         sendToUser(chat.getFrom().getId(), envelope);
-
+        
         sendToUser(chat.getTo().getId(), friendListEnvelope(getFriendChatsForUser(chat.getTo().getId())));
         sendToUser(chat.getFrom().getId(), friendListEnvelope(getFriendChatsForUser(chat.getFrom().getId())));
     }
-
+    
     public static Map<String, Object> friendListEnvelope(List<ChatSummary> list) {
         Map<String, Object> envelope = new HashMap<>();
         envelope.put("type", "friend_list");
         envelope.put("payload", list);
         return envelope;
     }
-
+    
     public static List<Chat> getChatHistory(int userId, int friendId) {
         org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession();
         try {
@@ -141,11 +143,11 @@ public class ChatService {
             ));
             c.addOrder(Order.desc("createdAt"));
             List<Chat> list = c.list();
-
+            
             Transaction tr = session.beginTransaction();
-
+            
             for (Chat chat : list) {
-
+                
                 if (chat.getFrom().getId() == friendId
                         && chat.getTo().getId() == userId
                         && chat.getStatus().equals(Status.DELIVERD)) {
@@ -159,16 +161,16 @@ public class ChatService {
             session.close();
         }
     }
-
+    
     public static Map<String, Object> singleChatEnvelope(List<Chat> chats) {
         Map<String, Object> envelope = new HashMap<>();
         envelope.put("type", "single_chat");
         envelope.put("payload", chats);
         return envelope;
     }
-
+    
     public static void saveNewChat(int userId, int friendId, String message) {
-
+        
         org.hibernate.Session s = HibernateUtil.getSessionFactory().openSession();
         User me = (User) s.get(User.class, userId);
         User friend = (User) s.get(User.class, friendId);
@@ -182,7 +184,7 @@ public class ChatService {
         s.save(chat);
         s.beginTransaction().commit();
         s.close();
-
+        
         Map<String, Object> envelope = new HashMap<>();
         envelope.put("type", "new_message");
         envelope.put("payload", chat);
@@ -201,5 +203,5 @@ public class ChatService {
         ChatService.sendToUser(chat.getTo().getId(), toMap);     // update to home chat
 
     }
-
+    
 }

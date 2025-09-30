@@ -19,10 +19,10 @@ public class User extends BaseEntity {
     private int id;
 
     @Column(name = "first_name", length = 45, nullable = false)
-    private String firstname;
+    private String firstName;
 
     @Column(name = "last_name", length = 45, nullable = false)
-    private String lastname;
+    private String lastName;
 
     @Column(name = "country_code", length = 5, nullable = false)
     private String countryCode;
@@ -38,8 +38,8 @@ public class User extends BaseEntity {
     }
 
     public User(String firstname, String lastname, String countryCode, String contactNo) {
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.firstName = firstname;
+        this.lastName = lastname;
         this.countryCode = countryCode;
         this.contactNo = contactNo;
     }
@@ -53,19 +53,19 @@ public class User extends BaseEntity {
     }
 
     public String getFirstname() {
-        return firstname;
+        return firstName;
     }
 
     public void setFirstname(String firstname) {
-        this.firstname = firstname;
+        this.firstName = firstname;
     }
 
     public String getLastname() {
-        return lastname;
+        return lastName;
     }
 
     public void setLastname(String lastname) {
-        this.lastname = lastname;
+        this.lastName = lastname;
     }
 
     public String getCountryCode() {

@@ -8,14 +8,12 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import jdk.jfr.Percentage;
-import org.hibernate.annotations.Persister;
 
 @MappedSuperclass
 public class BaseEntity implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at")
     private Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -27,7 +25,7 @@ public class BaseEntity implements Serializable {
         createdAt = new Date();
         updatedAt = new Date();
     }
-
+    
     @PreUpdate
     public void onUpdate() {
         updatedAt = new Date();

@@ -6,7 +6,9 @@ import entity.Status;
 import entity.User;
 import hibernate.HibernateUtil;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -63,4 +65,15 @@ public class UserService {
         }
         tr.commit();
     }
+
+    public static Map<String, Object> getFriendData(int friendId) { // single chat header data:
+        Session s = HibernateUtil.getSessionFactory().openSession();
+        User friend = (User) s.get(User.class, friendId);
+        s.close();
+        Map<String, Object> envelop = new HashMap<>();
+        envelop.put("type", "friend_data");
+        envelop.put("payload", friend);
+        return envelop;
+    }
+
 }

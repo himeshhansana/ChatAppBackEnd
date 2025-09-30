@@ -81,12 +81,19 @@ public class ChatEndPoint {
                     List<Chat> chats = ChatService.getChatHistory(userId, friendId);
                     Map<String, Object> envelop = ChatService.singleChatEnvelope(chats);
                     ChatService.sendToUser(userId, envelop);
+                    ChatService.sendToUser(userId, ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
                     break;
                 }
                 case "send_message": {
                     int friendId = (int) ((double) map.get("toUserId"));
                     String chat = String.valueOf(map.get("message"));
                     ChatService.saveNewChat(userId, friendId, chat);
+                    break;
+                }
+                case "get_friend_data": {
+                    int friendId = (int) ((double) map.get("friendId"));
+                     Map<String, Object> envelop = UserService.getFriendData(friendId);
+                    ChatService.sendToUser(userId, envelop);
 
                     break;
                 }

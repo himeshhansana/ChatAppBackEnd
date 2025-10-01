@@ -27,7 +27,7 @@ public class FriendList implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "friend_id")
-    private User frirnId;
+    private User friendId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status", length = 30)
@@ -38,7 +38,7 @@ public class FriendList implements Serializable {
 
     public FriendList(User userId, User frirnId) {
         this.userId = userId;
-        this.frirnId = frirnId;
+        this.friendId = frirnId;
     }
 
     public int getId() {
@@ -57,13 +57,13 @@ public class FriendList implements Serializable {
         this.userId = userId;
     }
 
-    public User getFrirnId() {
-        return frirnId;
-    }
+    public User getFriendId() {
+    return friendId;
+}
 
-    public void setFrirnId(User frirnId) {
-        this.frirnId = frirnId;
-    }
+public void setFriendId(User friendId) {
+    this.friendId = friendId;
+}
 
     public Status getStatus() {
         return status;

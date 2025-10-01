@@ -28,26 +28,22 @@ public class ChatEndPoint {
             userId = Integer.parseInt(query.substring("userId=".length()));
             ChatService.register(userId, session);
             UserService.updateLogInStatus(userId);
-            UserService.updateFriendChatStatus(userId);
-//            ChatService.sendToUser(userId,
-//            ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
         }
     }
 
     @OnClose
     public void onClose(Session session) {
-        if (userId > 0) { // userId != null
+        if (userId >= 0) { // userId != null
             ChatService.unregister(userId);
-            UserService.updateLogInStatus(userId);
+            UserService.updateLogOutStatus(userId);
         }
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
         if (userId > 0) {
-            UserService.updateLogInStatus(userId);
+            UserService.updateLogOutStatus(userId);
         }
-        throwable.printStackTrace();
     }
 
     @OnMessage
@@ -56,7 +52,7 @@ public class ChatEndPoint {
             Map<String, Object> map = ChatEndPoint.GSON.fromJson(message, Map.class);
             String type = (String) map.get("type");
             switch (type) {
-                case "send_chat":
+                case "send_chat": {
                     int fromId = (int) map.get("fromId");
                     int toId = (int) map.get("toId");
                     String chatText = (String) map.get("message");
@@ -71,7 +67,9 @@ public class ChatEndPoint {
                         ChatService.deliverChat(chat);
                     }
                     break;
+                }
                 case "get_chat_list": {
+                    System.out.println("get_chat_list");
                     ChatService.sendToUser(userId,
                             ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
                     break;
@@ -81,7 +79,8 @@ public class ChatEndPoint {
                     List<Chat> chats = ChatService.getChatHistory(userId, friendId);
                     Map<String, Object> envelop = ChatService.singleChatEnvelope(chats);
                     ChatService.sendToUser(userId, envelop);
-                    ChatService.sendToUser(userId, ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
+                    ChatService.sendToUser(userId,
+                            ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
                     break;
                 }
                 case "send_message": {
@@ -92,13 +91,18 @@ public class ChatEndPoint {
                 }
                 case "get_friend_data": {
                     int friendId = (int) ((double) map.get("friendId"));
-                     Map<String, Object> envelop = UserService.getFriendData(friendId);
+                    Map<String, Object> envelop = UserService.getFriendData(friendId);
                     ChatService.sendToUser(userId, envelop);
-
                     break;
                 }
-                default:
-                    System.out.println("Ignored unknown client type: " + type);
+                case "get_all_users": {
+                    Map<String, Object> envelop = UserService.getAllUsers(userId);
+                    ChatService.sendToUser(userId, envelop);
+                    break;
+                }
+                default: {
+                    System.out.println("Ignore unknown client type:" + type);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package socket;
 
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import entity.Chat;
 import entity.Status;
 import entity.User;
@@ -98,6 +99,16 @@ public class ChatEndPoint {
                 case "get_all_users": {
                     Map<String, Object> envelop = UserService.getAllUsers(userId);
                     ChatService.sendToUser(userId, envelop);
+                    break;
+                }
+                case "save_new_contact": {
+                    LinkedTreeMap userObject = (LinkedTreeMap) map.get("user"); //com.google.gson.internal
+                    User user = new User(
+                            String.valueOf(userObject.get("firstName")),
+                            String.valueOf(userObject.get("lastName")),
+                            String.valueOf(userObject.get("countryCode")),
+                            String.valueOf(userObject.get("contactNo")));
+                    UserService.saveNewContact(userId, user);
                     break;
                 }
                 default: {

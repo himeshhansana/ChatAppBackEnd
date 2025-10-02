@@ -33,12 +33,21 @@ public class FriendList implements Serializable {
     @Column(name = "user_status", length = 30)
     private Status status = Status.ACTIVE;
 
+    @Column(name = "display_name", length = 100, nullable = true)
+    private String displayName;
+
     public FriendList() {
     }
 
     public FriendList(User userId, User frirnId) {
         this.userId = userId;
         this.friendId = frirnId;
+    }
+
+    public FriendList(User userId, User frirnId, String displayName) {
+        this.userId = userId;
+        this.friendId = frirnId;
+        this.displayName = displayName;
     }
 
     public int getId() {
@@ -58,12 +67,12 @@ public class FriendList implements Serializable {
     }
 
     public User getFriendId() {
-    return friendId;
-}
+        return friendId;
+    }
 
-public void setFriendId(User friendId) {
-    this.friendId = friendId;
-}
+    public void setFriendId(User friendId) {
+        this.friendId = friendId;
+    }
 
     public Status getStatus() {
         return status;
@@ -71,5 +80,13 @@ public void setFriendId(User friendId) {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

@@ -26,7 +26,7 @@ public class ChatService {
 
     private static final ConcurrentHashMap<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-    static final String URL = "https://f0b0927a34a0.ngrok-free.app"; // ngrok proxy url
+    static final String URL = "https://a6dc6f3dab22.ngrok-free.app"; // ngrok proxy url
 
     public static void register(int userId, Session session) {
         SESSIONS.put(userId, session);
@@ -183,7 +183,7 @@ public class ChatService {
         }
 
         Criteria c2 = s.createCriteria(FriendList.class);
-        c1.add(Restrictions.and(Restrictions.eq("userId", friend), Restrictions.eq("friendId", me)));
+        c2.add(Restrictions.and(Restrictions.eq("userId", friend), Restrictions.eq("friendId", me)));
         FriendList fl2 = (FriendList) c2.uniqueResult();
         if (fl2 == null) {
             FriendList friend1 = new FriendList();

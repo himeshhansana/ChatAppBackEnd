@@ -1,6 +1,7 @@
 package socket;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import entity.Chat;
 import entity.Status;
@@ -9,6 +10,7 @@ import hibernate.HibernateUtil;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.json.Json;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -53,6 +55,12 @@ public class ChatEndPoint {
             Map<String, Object> map = ChatEndPoint.GSON.fromJson(message, Map.class);
             String type = (String) map.get("type");
             switch (type) {
+                case "PING": {
+                    JsonObject responseObject = new JsonObject();
+                    responseObject.addProperty("type", "PONG");
+                    ChatService.sendToUser(userId, responseObject);
+                    break;
+                }
                 case "send_chat": {
                     int fromId = (int) map.get("fromId");
                     int toId = (int) map.get("toId");
@@ -108,8 +116,10 @@ public class ChatEndPoint {
                             String.valueOf(userObject.get("lastName")),
                             String.valueOf(userObject.get("countryCode")),
                             String.valueOf(userObject.get("contactNo")));
-                    UserService.saveNewContact(userId, user);
+                    Map<String, Object> envelope = UserService.saveNewContact(userId, user);
+                    ChatService.sendToUser(userId, envelope);
                     break;
+
                 }
                 default: {
                     System.out.println("Ignore unknown client type:" + type);

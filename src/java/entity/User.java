@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package entity;
 
 import javax.persistence.Column;
@@ -9,6 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ *
+ * @author Dilhara
+ */
 @Entity
 @Table(name = "user")
 public class User extends BaseEntity {
@@ -37,9 +45,9 @@ public class User extends BaseEntity {
     public User() {
     }
 
-    public User(String firstname, String lastname, String countryCode, String contactNo) {
-        this.firstName = firstname;
-        this.lastName = lastname;
+    public User(String firstName, String lastName, String countryCode, String contactNo) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.countryCode = countryCode;
         this.contactNo = contactNo;
     }
@@ -52,20 +60,20 @@ public class User extends BaseEntity {
         this.id = id;
     }
 
-    public String getFirstname() {
+    public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstName = firstname;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLastname() {
+    public String getLastName() {
         return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastName = lastname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getCountryCode() {
@@ -91,4 +99,5 @@ public class User extends BaseEntity {
     public void setStatus(Status status) {
         this.status = status;
     }
+
 }

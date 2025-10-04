@@ -9,11 +9,15 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ *
+ * @author Dilhara
+ */
 @MappedSuperclass
 public class BaseEntity implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -21,13 +25,13 @@ public class BaseEntity implements Serializable {
     private Date updatedAt;
 
     @PrePersist
-    public void onCreate() {
+    protected void onCreate() {
         createdAt = new Date();
         updatedAt = new Date();
     }
-    
+
     @PreUpdate
-    public void onUpdate() {
+    protected void onUpdate() {
         updatedAt = new Date();
     }
 

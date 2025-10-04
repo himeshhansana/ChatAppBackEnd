@@ -2,11 +2,8 @@ package socket;
 
 import java.util.Date;
 
-/**
- *
- * @author Dilhara
- */
 public class ChatSummary {
+
     private int friendId;
     private String friendName;
     private String lastMessage;
@@ -73,6 +70,5 @@ public class ChatSummary {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
-    
-    
+
 }

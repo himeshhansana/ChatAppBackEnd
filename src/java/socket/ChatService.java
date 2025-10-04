@@ -26,7 +26,7 @@ public class ChatService {
 
     private static final ConcurrentHashMap<Integer, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-    static final String URL = "https://05743aceeb06.ngrok-free.app"; // ngrok proxy url
+    public static final String URL = "https://b77382de264b.ngrok-free.app"; // ngrok proxy url
 
     public static void register(int userId, Session session) {
         SESSIONS.put(userId, session);
@@ -70,25 +70,27 @@ public class ChatService {
 
                 List<Chat> chats = c1.list();
 
-                int unread = 0;
-                for (Chat c : chats) {
-                    if (c.getFrom().getId() == myFriend.getId()
-                            && c.getTo().getId() == userId
-                            && c.getStatus().equals(Status.DELIVERD)) {
-                        unread += 1;
-                    }
-                }
+                if (!chats.isEmpty()) {
 
-                if (!map.containsKey(myFriend.getId())) {
-                    String profileImage = ProfileService.getProfileUrl(myFriend.getId());
-                    map.put(myFriend.getId(), new ChatSummary(
-                            myFriend.getId(),
-                            myFriend.getFirstname() + " " + myFriend.getLastname(),
-                            chats.get(0).getMessage(),
-                            chats.get(0).getUpdatedAt(),
-                            unread,
-                            profileImage
-                    ));
+                    int unread = 0;
+                    for (Chat c : chats) {
+                        if (c.getFrom().getId() == myFriend.getId()
+                                && c.getTo().getId() == userId
+                                && c.getStatus().equals(Status.DELIVERED)) {
+                            unread += 1;
+                        }
+                    }
+                    if (!map.containsKey(myFriend.getId())) {
+                        String profileImage = ProfileService.getProfileUrl(myFriend.getId());
+                        map.put(myFriend.getId(), new ChatSummary(
+                                myFriend.getId(),
+                                myFriend.getFirstName() + " " + myFriend.getLastName(),
+                                chats.get(0).getMessage(),
+                                chats.get(0).getUpdatedAt(),
+                                unread,
+                                profileImage
+                        ));
+                    }
                 }
             }
 
@@ -137,14 +139,16 @@ public class ChatService {
                             Restrictions.eq("to.id", userId)
                     )
             ));
-            c.addOrder(Order.asc("createdAt"));
+            c.addOrder(Order.desc("createdAt"));
             List<Chat> list = c.list();
 
             Transaction tr = session.beginTransaction();
+
             for (Chat chat : list) {
+
                 if (chat.getFrom().getId() == friendId
                         && chat.getTo().getId() == userId
-                        && chat.getStatus().equals(Status.DELIVERD)) {
+                        && chat.getStatus().equals(Status.DELIVERED)) {
                     chat.setStatus(Status.READ);
                     session.update(chat);
                 }
@@ -157,10 +161,11 @@ public class ChatService {
     }
 
     public static Map<String, Object> singleChatEnvelope(List<Chat> chats) {
-        Map<String, Object> envelop = new HashMap<>();
-        envelop.put("type", "single_chat");
-        envelop.put("payload", chats);
-        return envelop;
+        Map<String, Object> envelope = new HashMap<>();
+        envelope.put("type", "single_chat");
+        envelope.put("payload", chats);
+
+        return envelope;
     }
 
     public static void saveNewChat(int userId, int friendId, String message) {
@@ -199,7 +204,7 @@ public class ChatService {
         chat.setMessage(message);
         chat.setCreatedAt(new Date());
         chat.setUpdatedAt(new Date());
-        chat.setFile("FILE:");
+        chat.setFiles("FILE:");
         s.save(chat);
         tr.commit();
         s.close();
@@ -212,11 +217,11 @@ public class ChatService {
         ChatService.sendToUser(chat.getFrom().getId(), envelope); // from single chat
         ChatService.sendToUser(chat.getTo().getId(), envelope); // to single chat
 
-        // Update both side -> HomeChatList
-        List<ChatSummary> fromList = ChatService.getFriendChatsForUser(chat.getFrom().getId()); // from List
+        //Update both side -> HomeChatList
+        List<ChatSummary> fromList = ChatService.getFriendChatsForUser(chat.getFrom().getId());//from List
         List<ChatSummary> toList = ChatService.getFriendChatsForUser(chat.getTo().getId()); // toList
         Map<String, Object> fromMap = ChatService.friendListEnvelope(fromList); // from
-        Map<String, Object> toMap = ChatService.friendListEnvelope(toList); // to
+        Map<String, Object> toMap = ChatService.friendListEnvelope(toList); //to
 
         ChatService.sendToUser(chat.getFrom().getId(), fromMap); // update from home chat
         ChatService.sendToUser(chat.getTo().getId(), toMap); // update to home chat

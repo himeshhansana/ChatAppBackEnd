@@ -1,12 +1,12 @@
 package entity;
 
 public enum Status {
-    ACTIVE,
+    ACTIVE, 
     BLOCKED,
-    DELIVERD,
-    READ,
-    SENT,
-    DELETED,
-    ONLINE,
+    DELIVERED, 
+    READ, 
+    SENT, 
+    DELETED, 
+    ONLINE, 
     OFFLINE
 }

@@ -30,7 +30,7 @@ public class FriendList implements Serializable {
     private User friendId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_status", length = 30)
+    @Column(length = 30, name = "user_status")
     private Status status = Status.ACTIVE;
 
     @Column(name = "display_name", length = 100, nullable = true)
@@ -39,14 +39,14 @@ public class FriendList implements Serializable {
     public FriendList() {
     }
 
-    public FriendList(User userId, User frirnId) {
+    public FriendList(User userId, User friendId) {
         this.userId = userId;
-        this.friendId = frirnId;
+        this.friendId = friendId;
     }
 
-    public FriendList(User userId, User frirnId, String displayName) {
+    public FriendList(User userId, User friendId, String displayName) {
         this.userId = userId;
-        this.friendId = frirnId;
+        this.friendId = friendId;
         this.displayName = displayName;
     }
 
@@ -89,4 +89,5 @@ public class FriendList implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
 }

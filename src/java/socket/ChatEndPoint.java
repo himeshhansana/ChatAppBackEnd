@@ -10,7 +10,6 @@ import hibernate.HibernateUtil;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.json.Json;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -31,12 +30,15 @@ public class ChatEndPoint {
             userId = Integer.parseInt(query.substring("userId=".length()));
             ChatService.register(userId, session);
             UserService.updateLogInStatus(userId);
+            UserService.updateFriendChatStatus(userId);
+//            ChatService.sendToUser(userId,
+//                    ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
         }
     }
 
     @OnClose
     public void onClose(Session session) {
-        if (userId >= 0) { // userId != null
+        if (userId > 0) { // userId != null
             ChatService.unregister(userId);
             UserService.updateLogOutStatus(userId);
         }
@@ -47,6 +49,7 @@ public class ChatEndPoint {
         if (userId > 0) {
             UserService.updateLogOutStatus(userId);
         }
+        throwable.printStackTrace();
     }
 
     @OnMessage
@@ -78,7 +81,6 @@ public class ChatEndPoint {
                     break;
                 }
                 case "get_chat_list": {
-                    System.out.println("get_chat_list");
                     ChatService.sendToUser(userId,
                             ChatService.friendListEnvelope(ChatService.getFriendChatsForUser(userId)));
                     break;
@@ -100,13 +102,13 @@ public class ChatEndPoint {
                 }
                 case "get_friend_data": {
                     int friendId = (int) ((double) map.get("friendId"));
-                    Map<String, Object> envelop = UserService.getFriendData(friendId);
-                    ChatService.sendToUser(userId, envelop);
+                    Map<String, Object> envelope = UserService.getFriendData(friendId);
+                    ChatService.sendToUser(userId, envelope);
                     break;
                 }
                 case "get_all_users": {
-                    Map<String, Object> envelop = UserService.getAllUsers(userId);
-                    ChatService.sendToUser(userId, envelop);
+                    Map<String, Object> envelope = UserService.getAllUsers(userId);
+                    ChatService.sendToUser(userId, envelope);
                     break;
                 }
                 case "save_new_contact": {
@@ -118,11 +120,17 @@ public class ChatEndPoint {
                             String.valueOf(userObject.get("contactNo")));
                     Map<String, Object> envelope = UserService.saveNewContact(userId, user);
                     ChatService.sendToUser(userId, envelope);
+                    Map<String, Object> e = UserService.getAllUsers(userId);
+                    ChatService.sendToUser(userId, e);
                     break;
-
+                }
+                case "set_user_profile": {
+                    Map<String, Object> envelope = UserService.getMyProfileData(userId);
+                    ChatService.sendToUser(userId, envelope);
+                    break;
                 }
                 default: {
-                    System.out.println("Ignore unknown client type:" + type);
+                    System.out.println("Ignored unknown client type: " + type);
                 }
             }
         } catch (Exception e) {

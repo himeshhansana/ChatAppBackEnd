@@ -1,16 +1,23 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package dto;
 
 import entity.Status;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ *
+ * @author Dilhara
+ */
 public class UserDTO implements Serializable {
 
     private int id;
     private String firstName;
     private String lastName;
     private String displayName;
-
     private String countryCode;
     private String contactNo;
     private String profileImage;
@@ -97,5 +104,6 @@ public class UserDTO implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-
+    
+    
 }

@@ -3,9 +3,9 @@ package controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import entity.User;
+import hibernate.HibernateUtil;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
@@ -20,18 +20,14 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import socket.ProfileService;
 
-/**
- *
- * @author hansa
- */
 @MultipartConfig
 @WebServlet(name = "UserController", urlPatterns = {"/UserController"})
 public class UserController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String countryCode = request.getParameter("countryCode");
@@ -43,36 +39,28 @@ public class UserController extends HttpServlet {
         responseObject.addProperty("status", false);
 
         if (firstName.isEmpty()) {
-            responseObject.addProperty("message", "First Name Is Required");
+            responseObject.addProperty("message", "First name is required");
         } else if (lastName.isEmpty()) {
-            responseObject.addProperty("message", "Last Name Is Required");
+            responseObject.addProperty("message", "Last name is required");
         } else if (countryCode.isEmpty()) {
-            responseObject.addProperty("message", "Country Code Is Required");
+            responseObject.addProperty("message", "Country code is required");
         } else if (contactNo.isEmpty()) {
-            responseObject.addProperty("message", "Contact Number Is Required");
+            responseObject.addProperty("message", "Contact number is required");
         } else if (profileImage == null) {
-            responseObject.addProperty("message", "Profile Image Is Required");
+            responseObject.addProperty("message", "Select a profile image");
         } else {
-
-            System.out.println(firstName);
-            System.out.println(lastName);
-            System.out.println(countryCode);
-            System.out.println(contactNo);
-            System.out.println(profileImage);
-
-            Session s = hibernate.HibernateUtil.getSessionFactory().openSession();
+            Session s = HibernateUtil.getSessionFactory().openSession();
             Criteria c1 = s.createCriteria(User.class);
             c1.add(Restrictions.eq("countryCode", countryCode));
             c1.add(Restrictions.eq("contactNo", contactNo));
             User user = (User) c1.uniqueResult();
-
             if (user != null) {
-                responseObject.addProperty("message", "This Contaact Number  already exists!");
+                responseObject.addProperty("message", "This contact number already exists!");
             } else {
                 user = new User(firstName, lastName, countryCode, contactNo);
                 user.setCreatedAt(new Date());
                 user.setUpdatedAt(new Date());
-                
+
                 Transaction tr = s.beginTransaction();
 
                 int id = (int) s.save(user);
@@ -81,25 +69,14 @@ public class UserController extends HttpServlet {
 
                 responseObject.add("user", gson.toJsonTree(user));
 
-                String appPath = getServletContext().getRealPath(""); // full path of the web pages
-
-                String newPath = appPath.replace("build" + File.separator + "web", "web" + File.separator + "profile-images");
-
-                File profileFolder = new File(newPath, String.valueOf(id));
-                if (!profileFolder.exists()) {
-                    profileFolder.mkdir();
-                }
-
-                File file1 = new File(profileFolder, "profile1.png");
-                Files.copy(profileImage.getInputStream(), file1.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                new ProfileService().saveProfileImage(id, request);
 
                 responseObject.addProperty("status", true);
+                responseObject.addProperty("userId", id);
             }
         }
-
         response.setContentType("application/json");
         response.getWriter().write(gson.toJson(responseObject));
-
     }
 
 }

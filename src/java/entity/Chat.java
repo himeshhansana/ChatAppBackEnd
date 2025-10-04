@@ -19,7 +19,6 @@ public class Chat extends BaseEntity {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     @ManyToOne
     @JoinColumn(name = "from_user")
     private User from;
@@ -31,8 +30,8 @@ public class Chat extends BaseEntity {
     @JoinColumn(name = "to_user")
     private User to;
 
-    @Column(name = "files", columnDefinition = "LONGTEXT", nullable = false)
-    private String file;
+    @Column(name = "files", nullable = false, columnDefinition = "LONGTEXT")
+    private String files;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 30)
@@ -41,11 +40,11 @@ public class Chat extends BaseEntity {
     public Chat() {
     }
 
-    public Chat(User from, String message, User to, String file, Status status) {
+    public Chat(User from, String message, User to, String files, Status status) {
         this.from = from;
         this.message = message;
         this.to = to;
-        this.file = file;
+        this.files = files;
         this.status = status;
     }
 
@@ -81,12 +80,12 @@ public class Chat extends BaseEntity {
         this.to = to;
     }
 
-    public String getFile() {
-        return file;
+    public String getFiles() {
+        return files;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public void setFiles(String files) {
+        this.files = files;
     }
 
     public Status getStatus() {
@@ -96,4 +95,5 @@ public class Chat extends BaseEntity {
     public void setStatus(Status status) {
         this.status = status;
     }
+
 }
